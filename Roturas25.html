@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Roturas25</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06080e;--bg2:#0c1020;--bg3:#111828;--bg4:#172032;
+  --bd:#1c2d44;--bd2:#243550;
+  --grn:#00ff88;--grna:rgba(0,255,136,.12);--grnb:rgba(0,255,136,.06);
+  --yel:#ffe600;--yela:rgba(255,230,0,.13);--yelb:rgba(255,230,0,.06);
+  --blu:#5ec8f8;--blua:rgba(94,200,248,.11);
+  --wht:#ffffff;--wht2:#c8dff0;--wht3:#6e90b0;--wht4:#2c4560;
+  --red:#ff5555;
+  --nav:56px;--bot:60px;--r:7px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{background:var(--bg);color:var(--wht);font-family:'Space Grotesk',sans-serif;min-height:100dvh;overflow-x:hidden;padding-bottom:calc(var(--bot)+8px)}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,136,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.012) 1px,transparent 1px);background-size:52px 52px;pointer-events:none;z-index:0}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:300;height:var(--nav);background:rgba(6,8,14,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 14px;gap:10px}
+.logo{font-family:'Oswald',sans-serif;font-weight:700;font-size:28px;letter-spacing:1px;line-height:1;flex-shrink:0}
+.logo em{color:var(--grn);font-style:normal}
+.logo sup{font-size:11px;color:var(--wht3);font-family:'IBM Plex Mono',monospace;letter-spacing:2px;vertical-align:middle;margin-left:2px}
+.hsp{flex:1}
+.hpill{display:flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--bd);border-radius:20px;padding:4px 10px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);flex-shrink:0;text-transform:uppercase;letter-spacing:.8px;transition:all .2s}
+.hpill.ok{border-color:rgba(0,255,136,.5);color:var(--grn)}
+.hpill.err{border-color:rgba(255,85,85,.4);color:var(--red)}
+.led{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--wht4);transition:all .3s}
+.led.on{background:var(--grn);box-shadow:0 0 8px var(--grn);animation:blink 2s infinite}
+.led.load{background:var(--yel);box-shadow:0 0 5px var(--yel);animation:blink .6s infinite}
+.led.err{background:var(--red);box-shadow:0 0 5px var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;height:var(--bot);background:rgba(6,8,14,.97);backdrop-filter:blur(20px);border-top:1px solid var(--bd);display:flex;z-index:300;padding-bottom:env(safe-area-inset-bottom,0)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--wht4);font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.5px;transition:color .18s;position:relative;padding:8px 2px 4px}
+.ni .ico{font-size:20px;line-height:1}
+.ni.active{color:var(--grn)}
+.ni.active .ico{filter:drop-shadow(0 0 5px var(--grn))}
+.nbadge{position:absolute;top:4px;right:calc(50% - 22px);background:var(--yel);color:var(--bg);font-size:9px;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px;font-family:'IBM Plex Mono',monospace;font-weight:600}
+
+/* PAGES */
+.page{display:none;position:relative;z-index:1}
+.page.active{display:block}
+.wrap{max-width:980px;margin:0 auto;padding:14px 12px}
+@media(min-width:768px){.wrap{padding:20px}}
+
+/* SECTION HEADER */
+.sec{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);text-transform:uppercase;letter-spacing:2px;display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:6px}
+.sec::after{content:'';flex:1;height:1px;background:var(--bd)}
+
+/* PILLS */
+.pills{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{padding:5px 13px;border-radius:20px;border:1px solid var(--bd2);background:transparent;color:var(--wht3);font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;white-space:nowrap;transition:all .18s;flex-shrink:0}
+.pill.active{background:var(--grn);color:var(--bg);border-color:var(--grn);font-weight:600}
+
+/* CARD GENERIC */
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);position:relative;overflow:hidden;margin-bottom:8px}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--wht4)}
+.card.live::before{background:var(--red)}
+.card.alert::before{background:var(--grn);box-shadow:0 0 14px var(--grn)}
+.card.mon::before{background:var(--yel)}
+.card.upcoming::before{background:var(--bd2)}
+.card.fin::before{background:var(--wht4)}
+.card.a25::before{background:var(--grn);box-shadow:0 0 14px var(--grn)}
+.card.a67::before{background:var(--yel);box-shadow:0 0 10px var(--yel)}
+
+/* SUMMARY BOXES */
+.sumgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+@media(min-width:480px){.sumgrid{grid-template-columns:repeat(4,1fr)}}
+.sumbox{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:11px 12px;text-align:center}
+.sumval{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;line-height:1;margin-bottom:3px}
+.sumlbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);text-transform:uppercase;letter-spacing:1px}
+.cv{color:var(--wht)}.cg{color:var(--grn)}.cy{color:var(--yel)}.cb{color:var(--blu)}
+
+/* EMPTY */
+.empty{text-align:center;padding:28px 12px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--wht4);text-transform:uppercase;letter-spacing:1.5px}
+.ei{font-size:26px;margin-bottom:8px;opacity:.3}
+
+/* BANNER */
+.banner{border-radius:var(--r);padding:14px;margin-bottom:14px;border:1px solid}
+.banner.blue{background:var(--blua);border-color:rgba(94,200,248,.25)}
+.banner.green{background:var(--grnb);border-color:rgba(0,255,136,.2)}
+.banner.yellow{background:var(--yelb);border-color:rgba(255,230,0,.25)}
+.btitle{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;letter-spacing:.5px;margin-bottom:8px}
+.banner.blue .btitle{color:var(--blu)}.banner.green .btitle{color:var(--grn)}.banner.yellow .btitle{color:var(--yel)}
+.btext{font-size:13px;color:var(--wht2);line-height:1.6;margin-bottom:10px}
+.step{display:flex;gap:8px;font-size:13px;color:var(--wht2);margin-bottom:7px;align-items:flex-start;line-height:1.5}
+.stn{width:20px;height:20px;border-radius:50%;font-family:'IBM Plex Mono',monospace;font-size:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-weight:600}
+.banner.blue .stn{background:var(--blu);color:var(--bg)}.banner.green .stn{background:var(--grn);color:var(--bg)}.banner.yellow .stn{background:var(--yel);color:var(--bg)}
+a.lnk{color:var(--blu);text-decoration:none;border-bottom:1px solid rgba(94,200,248,.3)}
+a.lnk:hover{color:#8de0ff}.banner.yellow a.lnk{color:var(--yel);border-color:rgba(255,230,0,.3)}.banner.green a.lnk{color:var(--grn);border-color:rgba(0,255,136,.3)}
+.inprow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.inp{flex:1;min-width:160px;background:var(--bg4);border:1px solid var(--bd2);color:var(--wht);padding:9px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;border-radius:var(--r);outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--grn)}.inp::placeholder{color:var(--wht4)}
+.btn{background:var(--grn);color:var(--bg);border:none;padding:9px 18px;font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;letter-spacing:.5px;border-radius:var(--r);cursor:pointer;white-space:nowrap;transition:all .18s}
+.btn:hover{background:#33ffaa}.btn.yel{background:var(--yel)}.btn.yel:hover{background:#ffe933}.btn.blu{background:var(--blu)}.btn.blu:hover{background:#8de0ff}
+.note{margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);line-height:1.6}
+.cd{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--grn)}
+.cy2{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--yel)}
+
+/* FOOTBALL CARD */
+.fc-in{padding:12px 14px 10px;display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:center}
+.fc-time{text-align:center}
+.fcmin{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;line-height:1}
+.fcmin.lv{color:var(--red)}.fcmin.ht{color:var(--blu)}.fcmin.fin{color:var(--wht4);font-size:14px}
+.fcbadge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.8px;margin-top:3px}
+.fcbadge.lv{background:rgba(255,85,85,.15);color:#ff8888;border:1px solid rgba(255,85,85,.3)}
+.fcbadge.ht{background:var(--blua);color:var(--blu);border:1px solid rgba(94,200,248,.3)}
+.fcbadge.fin{background:var(--bg4);color:var(--wht3);border:1px solid var(--bd)}
+.fcbadge.ns{background:var(--bg4);color:var(--wht3);border:1px solid var(--bd)}
+.fc-lg{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.fc-teams{display:flex;align-items:center;gap:8px}
+.fc-t{font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;color:var(--wht);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
+@media(min-width:440px){.fc-t{max-width:155px;font-size:19px}}
+.fc-sc{background:var(--bg4);border:1px solid var(--bd2);font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;padding:3px 10px;border-radius:3px;white-space:nowrap;color:var(--wht);flex-shrink:0}
+.fc-sc.z{color:var(--wht3)}
+.fc-g2{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);margin-top:4px}
+.alert-bar{margin:0 12px 10px;border-radius:5px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid}
+.alert-bar.g{background:var(--grna);border-color:rgba(0,255,136,.3)}
+.alert-bar.y{background:var(--yela);border-color:rgba(255,230,0,.3)}
+.alert-txt{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.5px;line-height:1.5}
+.alert-bar.g .alert-txt{color:var(--grn)}.alert-bar.y .alert-txt{color:var(--yel)}
+.logbtn{background:transparent;cursor:pointer;font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;border-radius:3px;padding:4px 12px;white-space:nowrap;transition:all .18s;flex-shrink:0}
+.logbtn.g{border:1px solid var(--grn);color:var(--grn)}.logbtn.g:hover{background:var(--grn);color:var(--bg)}
+.logbtn.y{border:1px solid var(--yel);color:var(--yel)}.logbtn.y:hover{background:var(--yel);color:var(--bg)}
+.upt{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--wht2)}
+.ups{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht4);margin-top:2px}
+
+/* TENNIS CARD */
+.tc-in{padding:12px 14px}
+.tc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;gap:8px}
+.tc-trn{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);text-transform:uppercase;letter-spacing:.8px}
+.tc-cat{display:inline-block;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:8px;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.8px}
+.tc-cat.itf{background:var(--yela);color:var(--yel);border:1px solid rgba(255,230,0,.3)}
+.tc-cat.wta,.tc-cat.wta125{background:var(--blua);color:var(--blu);border:1px solid rgba(94,200,248,.3)}
+.tc-cat.atp{background:var(--grna);color:var(--grn);border:1px solid rgba(0,255,136,.3)}
+.tc-cat.challenger{background:rgba(180,100,255,.1);color:#c890ff;border:1px solid rgba(180,100,255,.3)}
+.tc-mon{font-family:'IBM Plex Mono',monospace;font-size:8px;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.5px}
+.tc-mon.yes{background:var(--grna);color:var(--grn);border:1px solid rgba(0,255,136,.3)}
+.tc-mon.no{background:var(--bg4);color:var(--wht4);border:1px solid var(--bd)}
+
+/* Player rows */
+.tc-rows{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.tc-row{display:flex;align-items:center;gap:4px}
+.tc-name{font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;color:var(--wht);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px}
+.tc-name.srv::after{content:'●';color:var(--grn);font-size:7px;margin-left:5px;vertical-align:middle}
+.tset{width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--wht4);border-radius:2px;flex-shrink:0}
+.tset.won{color:var(--wht);font-weight:600}
+.tset.cur{background:var(--bg4);color:var(--yel);border:1px solid rgba(255,230,0,.3)}
+.todds{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:2px 8px;border-radius:3px;border:1px solid var(--bd2);background:var(--bg4);color:var(--wht2);flex-shrink:0;margin-left:6px}
+.todds.fav{border-color:var(--grn);color:var(--grn);background:var(--grna);font-weight:600}
+
+/* Tennis info row */
+.tc-info{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.tc-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);background:var(--bg4);padding:2px 7px;border-radius:2px;border:1px solid var(--bd)}
+.tc-badge.src{color:var(--wht2)}
+
+/* Tennis alert box */
+.tc-alert{margin-top:10px;padding:11px 13px;background:var(--grna);border:1px solid rgba(0,255,136,.3);border-radius:6px}
+.tc-alert-title{font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.tc-alert-sc{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--wht2);margin-bottom:4px}
+.tc-alert-odds{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--wht3);margin-bottom:8px;line-height:1.6}
+
+/* STATS */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.sbox{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;text-align:center}
+.sval{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;line-height:1;margin-bottom:3px}
+.slbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);text-transform:uppercase;letter-spacing:1px}
+.ext3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.wrrow{margin-bottom:12px}
+.wrhead{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.wrbar{height:4px;background:var(--bg4);border-radius:2px;border:1px solid var(--bd);overflow:hidden}
+.wrfill{height:100%;background:linear-gradient(90deg,var(--red),var(--grn));border-radius:2px;transition:width .6s}
+
+/* Period / comp */
+.prow{display:flex;gap:5px;margin-bottom:10px}
+.psel{padding:4px 11px;border-radius:12px;border:1px solid var(--bd2);background:transparent;color:var(--wht3);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;transition:all .18s}
+.psel.active{background:var(--bg3);color:var(--wht);border-color:var(--grn)}
+.ctabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.ctabs::-webkit-scrollbar{display:none}
+.ctab{padding:4px 12px;border-radius:20px;border:1px solid var(--bd2);background:transparent;color:var(--wht3);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .18s}
+.ctab.active{background:var(--grn);color:var(--bg);border-color:var(--grn);font-weight:600}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:7px;margin-bottom:12px}
+.cbox{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:10px 11px}
+.cname{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cprof{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600}
+.cprof.g{color:var(--grn)}.cprof.r{color:#ff8888}.cprof.z{color:var(--wht3)}
+.csub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);margin-top:2px;line-height:1.5}
+.cbar{height:3px;background:var(--bd);border-radius:2px;overflow:hidden;margin-top:5px}
+.cfill{height:100%;border-radius:2px}
+
+/* Widget */
+.w{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.wh{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--wht2)}
+.wb{padding:12px}
+
+/* Bet rows */
+.betlist{display:flex;flex-direction:column;gap:6px}
+.betrow{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:9px 11px;display:grid;grid-template-columns:1fr auto;gap:5px;align-items:start;position:relative;overflow:hidden}
+.betrow::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px}
+.betrow.win::before{background:var(--grn)}.betrow.loss::before{background:#ff8888}.betrow.pending::before{background:var(--yel)}
+.bname{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:var(--wht);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bmeta{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);margin-top:2px;line-height:1.5}
+.bacts{display:flex;gap:4px;margin-top:6px}
+.bmi{border:1px solid;padding:2px 9px;font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;border-radius:2px;background:transparent;transition:all .18s}
+.bmi.g{border-color:var(--grn);color:var(--grn)}.bmi.g:hover{background:var(--grn);color:var(--bg)}
+.bmi.r{border-color:#ff8888;color:#ff8888}.bmi.r:hover{background:#ff8888;color:var(--bg)}
+.bmi.del{border-color:var(--wht4);color:var(--wht4)}.bmi.del:hover{border-color:var(--red);color:var(--red)}
+.bprofit{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600}
+.bprofit.win{color:var(--grn)}.bprofit.loss{color:#ff8888}.bprofit.pending{color:var(--yel)}
+.bunits{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3)}
+
+/* CONFIG */
+.cfgwrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.sc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.sch{padding:10px 14px;border-bottom:1px solid var(--bd);font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--wht2)}
+.scb{padding:14px}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+.trow+.trow{border-top:1px solid var(--bd)}
+.tlbl{font-size:14px;color:var(--wht)}
+.tsub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);margin-top:2px;line-height:1.4}
+.tog{width:40px;height:22px;background:var(--bg4);border:1px solid var(--bd2);border-radius:11px;cursor:pointer;position:relative;transition:all .2s;flex-shrink:0}
+.tog.on{background:var(--grn);border-color:var(--grn)}
+.tog::after{content:'';position:absolute;width:16px;height:16px;background:var(--wht);border-radius:50%;top:2px;left:2px;transition:transform .2s}
+.tog.on::after{transform:translateX(18px)}
+.cfgbox{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:10px 11px;margin-top:3px}
+.cfglbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.cfgv{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:var(--grn)}
+.cfgv input{background:transparent;border:none;outline:none;color:var(--grn);font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;width:68px}
+.csec{margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
+.cslbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.kd{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 10px;background:var(--bg3);border-radius:3px;border:1px solid var(--bd);color:var(--wht2);word-break:break-all}
+.kd.set{color:var(--grn);border-color:rgba(0,255,136,.3)}
+.infobox{background:var(--grnb);border:1px solid rgba(0,255,136,.15);border-radius:5px;padding:9px 12px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--grn);line-height:1.7;margin-top:10px}
+.infobox.yel{background:var(--yelb);border-color:rgba(255,230,0,.15);color:var(--yel)}
+.infobox.blu{background:var(--blua);border-color:rgba(94,200,248,.15);color:var(--blu)}
+.cfg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(14px);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+@media(min-width:600px){.ov{align-items:center;padding:20px}}
+.ov.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid rgba(0,255,136,.2);width:100%;max-width:460px;border-radius:14px 14px 0 0;padding:18px 16px 28px;transform:translateY(40px);transition:transform .3s cubic-bezier(.34,1.3,.64,1);max-height:92vh;overflow-y:auto}
+@media(min-width:600px){.modal{border-radius:var(--r);padding:24px;transform:translateY(20px)}}
+.ov.open .modal{transform:translateY(0)}
+.dragh{width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 16px}
+@media(min-width:600px){.dragh{display:none}}
+.mtitle{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.msub{font-size:13px;color:var(--wht2);margin-bottom:16px}
+.field{margin-bottom:12px}
+.flbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;display:block}
+.finp{width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--wht);padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:13px;border-radius:var(--r);outline:none;transition:border-color .2s;-webkit-appearance:none}
+.finp:focus{border-color:var(--grn)}.finp::placeholder{color:var(--wht4)}
+.finp option{background:var(--bg3);color:var(--wht)}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mbtns{display:flex;gap:8px;margin-top:16px}
+.mbtnp{flex:1;background:var(--grn);color:var(--bg);border:none;padding:12px;font-family:'Oswald',sans-serif;font-size:17px;font-weight:700;letter-spacing:.5px;cursor:pointer;text-transform:uppercase;border-radius:var(--r);transition:all .18s}
+.mbtnp:hover{background:#33ffaa}
+.mbtns2{background:transparent;color:var(--wht2);border:1px solid var(--bd2);padding:12px 16px;font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;cursor:pointer;text-transform:uppercase;border-radius:var(--r);transition:all .18s}
+.mbtns2:hover{border-color:var(--wht2)}
+
+/* TOASTS */
+.toasts{position:fixed;top:64px;right:10px;z-index:999;display:flex;flex-direction:column;gap:8px;max-width:calc(100vw - 20px)}
+@media(min-width:480px){.toasts{max-width:360px;right:14px}}
+.toast{background:var(--bg3);border:1px solid var(--grn);border-radius:var(--r);padding:11px 13px;display:flex;gap:9px;align-items:flex-start;box-shadow:0 8px 30px rgba(0,0,0,.8);animation:tin .32s cubic-bezier(.34,1.4,.64,1)}
+.toast.warn{border-color:var(--yel)}.toast.info{border-color:var(--blu)}
+@keyframes tin{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+.tist{font-size:17px;flex-shrink:0;padding-top:1px}
+.ttitle{font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+.toast.warn .ttitle{color:var(--yel)}.toast.info .ttitle{color:var(--blu)}
+.tbody{font-size:12px;color:var(--wht2);line-height:1.5}
+.tbtn{margin-top:6px;background:var(--grn);color:var(--bg);border:none;padding:4px 12px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-radius:3px;text-transform:uppercase}
+.toast.warn .tbtn{background:var(--yel)}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(var(--bot)+12px);right:14px;z-index:150;width:48px;height:48px;border-radius:50%;background:var(--grn);color:var(--bg);border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,255,136,.4);transition:all .2s}
+.fab:hover{transform:scale(1.08);background:#33ffaa}
+@media(min-width:768px){.fab{display:none}}
+.abtn{background:transparent;border:1px solid var(--grn);color:var(--grn);padding:3px 10px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.3px;cursor:pointer;border-radius:3px;text-transform:uppercase;transition:all .18s}
+.abtn:hover{background:var(--grn);color:var(--bg)}
+.lupd{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--wht4);text-align:center;margin-top:4px;padding-bottom:4px}
+
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Roturas<em>25</em></div>
+  <div class="hsp"></div>
+  <div class="hpill" id="syncPill"><div class="led" id="fbLed"></div><span id="fbLbl">SYNC</span></div>
+  <div class="hpill" id="tgPill" style="margin-left:6px">✈ <span id="tgLbl">TG</span></div>
+</header>
+
+<div class="toasts" id="toasts"></div>
+<button class="fab" onclick="openModal()">+</button>
+
+<!-- ══════ LIVE ══════ -->
+<div class="page active" id="page-live">
+<div class="wrap">
+  <div class="sumgrid">
+    <div class="sumbox"><div class="sumval cg" id="ls-rot">0</div><div class="sumlbl">Roturas activas</div></div>
+    <div class="sumbox"><div class="sumval cy" id="ls-mon">0</div><div class="sumlbl">Monitorizados</div></div>
+    <div class="sumbox"><div class="sumval cv" id="ls-fut">0</div><div class="sumlbl">Fútbol live</div></div>
+    <div class="sumbox"><div class="sumval cb" id="ls-ten">0</div><div class="sumlbl">Tenis live</div></div>
+  </div>
+  <div class="sec">🟢 Alertas de rotura activas</div>
+  <div id="live-alerts"><div class="empty"><div class="ei">🔍</div>Sin roturas activas ahora</div></div>
+  <div class="sec" style="margin-top:14px">⚽ Fútbol con alerta</div>
+  <div id="live-football"><div class="empty"><div class="ei">⚽</div>Sin alertas de fútbol</div></div>
+  <div class="sec" style="margin-top:14px">🎾 Tenis monitorizado (cuota fav. 1.20–1.60)</div>
+  <div id="live-tennis"><div class="empty"><div class="ei">🎾</div>Sin partidos monitorizados</div></div>
+  <div class="lupd" id="lupd">Esperando actualización...</div>
+</div>
+</div>
+
+<!-- ══════ FÚTBOL ══════ -->
+<div class="page" id="page-football">
+<div class="wrap">
+  <div id="fBanner" class="banner blue">
+    <div class="btitle">Conectar Football-data.org</div>
+    <div class="btext">API gratuita para LaLiga y Premier League en tiempo real.</div>
+    <div class="step"><div class="stn">1</div><span>Ve a <a class="lnk" href="https://www.football-data.org/client/register" target="_blank">football-data.org/client/register</a> (gratis, sin tarjeta)</span></div>
+    <div class="step"><div class="stn">2</div><span>Recibirás la API Key por email. Pégala aquí:</span></div>
+    <div class="inprow">
+      <input class="inp" id="fkb" placeholder="API Key football-data.org">
+      <button class="btn" onclick="saveKey('f')">Conectar</button>
+    </div>
+  </div>
+  <div class="pills" id="pf">
+    <button class="pill active" onclick="setFF('all',this)">Todos</button>
+    <button class="pill" onclick="setFF('laliga',this)">LaLiga</button>
+    <button class="pill" onclick="setFF('premier',this)">Premier</button>
+    <button class="pill" onclick="setFF('live',this)">🔴 Live</button>
+    <button class="pill" onclick="setFF('up24',this)">⏰ Próx. 24h</button>
+  </div>
+  <div class="sec">Partidos</div>
+  <div id="fcards"><div class="empty"><div class="ei">⚽</div>Configura tu API Key para ver partidos</div></div>
+</div>
+</div>
+
+<!-- ══════ TENIS ══════ -->
+<div class="page" id="page-tennis">
+<div class="wrap">
+  <div id="tBanner" class="banner yellow">
+    <div class="btitle">Conectar AllSportsAPI — Tenis punto a punto</div>
+    <div class="btext">Cubre ITF, ATP, WTA, WTA 125, Challenger con datos punto a punto verificados.<br>Las cuotas que muestra la app son las <strong>cuotas pre-match de inicio de partido</strong> (campo <span class="cy2">live_odds</span> de AllSportsAPI).</div>
+    <div class="step"><div class="stn">1</div><span>Ve a <a class="lnk" href="https://allsportsapi.com/register" target="_blank">allsportsapi.com/register</a> — plan gratuito, sin tarjeta</span></div>
+    <div class="step"><div class="stn">2</div><span>Copia tu API Key y pégala aquí:</span></div>
+    <div class="inprow">
+      <input class="inp" id="tkb" placeholder="API Key AllSportsAPI">
+      <button class="btn yel" onclick="saveKey('t')">Conectar</button>
+    </div>
+    <div class="note">✓ ITF · ATP · WTA · WTA 125 · Challenger · ✓ <span class="cy2">serve_lost</span> punto a punto · ✓ Cuotas pre-match</div>
+  </div>
+  <div class="pills" id="pt">
+    <button class="pill active" onclick="setTF('all',this)">Todos</button>
+    <button class="pill" onclick="setTF('mon',this)">🟡 Monitorizados</button>
+    <button class="pill" onclick="setTF('alert',this)">🟢 Alerta</button>
+    <button class="pill" onclick="setTF('atp',this)">ATP</button>
+    <button class="pill" onclick="setTF('wta',this)">WTA</button>
+    <button class="pill" onclick="setTF('wta125',this)">WTA 125</button>
+    <button class="pill" onclick="setTF('challenger',this)">Challenger</button>
+    <button class="pill" onclick="setTF('itf',this)">ITF</button>
+    <button class="pill" onclick="setTF('up24',this)">⏰ Próx. 24h</button>
+  </div>
+  <div class="sec">Partidos</div>
+  <div id="tcards"><div class="empty"><div class="ei">🎾</div>Configura tu API Key para ver partidos</div></div>
+</div>
+</div>
+
+<!-- ══════ STATS ══════ -->
+<div class="page" id="page-stats">
+<div class="wrap">
+  <div class="w">
+    <div class="wh">Resumen global</div>
+    <div class="wb">
+      <div class="sgrid">
+        <div class="sbox"><div class="sval cv" id="st">0</div><div class="slbl">Total</div></div>
+        <div class="sbox"><div class="sval cg" id="sw">0</div><div class="slbl">Ganadas</div></div>
+        <div class="sbox"><div class="sval" style="color:#ff8888" id="sl">0</div><div class="slbl">Perdidas</div></div>
+        <div class="sbox"><div class="sval cy" id="sp">0</div><div class="slbl">Pendientes</div></div>
+      </div>
+      <div class="ext3">
+        <div class="sbox"><div class="sval cg" id="su">0u</div><div class="slbl">Unidades netas</div></div>
+        <div class="sbox"><div class="sval" id="sy">0%</div><div class="slbl">Yield</div></div>
+        <div class="sbox"><div class="sval" id="sbp">+0€</div><div class="slbl">Beneficio</div></div>
+      </div>
+      <div class="wrrow">
+        <div class="wrhead"><span>Win Rate</span><span id="wrt">0%</span></div>
+        <div class="wrbar"><div class="wrfill" id="wrf" style="width:0%"></div></div>
+      </div>
+      <div style="height:80px"><svg id="minichart" viewBox="0 0 300 80" preserveAspectRatio="none" style="width:100%;height:100%"><text x="150" y="44" text-anchor="middle" fill="#2c4560" font-size="9" font-family="IBM Plex Mono">Sin apuestas</text></svg></div>
+    </div>
+  </div>
+
+  <div class="w">
+    <div class="wh">Evolución de beneficio</div>
+    <div class="wb">
+      <div class="prow" id="prow">
+        <button class="psel active" onclick="setPeriod(7,this)">7d</button>
+        <button class="psel" onclick="setPeriod(30,this)">30d</button>
+        <button class="psel" onclick="setPeriod(90,this)">3m</button>
+        <button class="psel" onclick="setPeriod(0,this)">Todo</button>
+      </div>
+      <div style="height:110px"><svg id="bigchart" viewBox="0 0 400 110" preserveAspectRatio="none" style="width:100%;height:100%"><text x="200" y="60" text-anchor="middle" fill="#2c4560" font-size="9" font-family="IBM Plex Mono">Sin datos</text></svg></div>
+    </div>
+  </div>
+
+  <div class="w">
+    <div class="wh">Por competición</div>
+    <div class="wb">
+      <div class="ctabs" id="ctabs"><button class="ctab active" data-comp="all" onclick="setComp('all',this)">Todas</button></div>
+      <div class="cgrid" id="cgrid"></div>
+      <div class="betlist" id="cbets" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="w">
+    <div class="wh">Historial <button class="abtn" onclick="openModal()">+ Añadir</button></div>
+    <div class="wb" style="padding:8px"><div class="betlist" id="blog"></div></div>
+  </div>
+</div>
+</div>
+
+<!-- ══════ CONFIG ══════ -->
+<div class="page" id="page-config">
+<div class="wrap"><div class="cfgwrap">
+
+  <div class="sc">
+    <div class="sch">☁ Sincronización Firebase</div>
+    <div class="scb">
+      <div class="infobox">
+        ✓ Firebase preconfigurado y activo<br>
+        Proyecto: <span class="cd">roturas25-default-rtdb</span><br>
+        Todos los dispositivos se sincronizan automáticamente.<br>
+        Estado: <span id="fbStatus" style="color:var(--yel)">Conectando...</span>
+      </div>
+      <div class="csec">
+        <div class="cslbl">URL Firebase (cambiar solo si creas otro proyecto)</div>
+        <div class="kd set" id="fbUrlD">https://roturas25-default-rtdb.europe-west1.firebasedatabase.app</div>
+        <div class="inprow" style="margin-top:8px">
+          <input class="inp" id="fbIn" placeholder="Nueva URL Firebase (opcional)">
+          <button class="btn" onclick="changeFB()">Cambiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="sch">✈ Telegram — Preconfigurado</div>
+    <div class="scb">
+      <div class="infobox">
+        ✓ Telegram activo. Las alertas llegan directamente.<br>
+        Token: <span class="cd">8171273424:AAG...</span><br>
+        Chat ID: <span class="cd">6307700447</span>
+      </div>
+      <div style="margin-top:10px"><button onclick="testTG()" class="btn" style="font-size:13px;padding:8px 16px">Enviar prueba Telegram</button></div>
+      <div class="csec">
+        <div class="cslbl">Cambiar Telegram (opcional)</div>
+        <div class="inprow" style="margin-top:4px">
+          <input class="inp" id="tgTok" placeholder="Bot Token">
+          <input class="inp" id="tgCid" placeholder="Chat ID">
+          <button class="btn" onclick="saveTG()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="sch">🔑 API Keys</div>
+    <div class="scb">
+      <div class="cslbl">Football-data.org (LaLiga + Premier)</div>
+      <div class="kd" id="fKD">No configurada</div>
+      <div class="inprow" style="margin-top:6px">
+        <input type="password" class="inp" id="fks" placeholder="API Key football-data.org">
+        <button class="btn" onclick="saveKey('f','s')">Guardar</button>
+      </div>
+      <div class="note">→ <a class="lnk" href="https://www.football-data.org/client/register" target="_blank">football-data.org</a> (gratis)</div>
+      <div class="csec">
+        <div class="cslbl">AllSportsAPI — Tenis (ITF / ATP / WTA / WTA 125 / Challenger)</div>
+        <div class="kd" id="tKD">No configurada</div>
+        <div class="inprow" style="margin-top:6px">
+          <input type="password" class="inp" id="tks" placeholder="API Key AllSportsAPI">
+          <button class="btn yel" onclick="saveKey('t','s')">Guardar</button>
+        </div>
+        <div class="note">→ <a class="lnk" href="https://allsportsapi.com/register" target="_blank">allsportsapi.com</a> (gratis, 260 peticiones/hora)</div>
+        <div class="infobox yel" style="margin-top:10px">
+          Las cuotas mostradas son las cuotas <strong>pre-match de inicio del partido</strong> que AllSportsAPI
+          almacena en el campo <span class="cy2">live_odds</span> del mercado "Match Winner". Son fijas desde el inicio y no cambian con el partido en curso.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="sch">🎾 Alertas — Tenis</div>
+    <div class="scb">
+      <div class="trow">
+        <div><div class="tlbl">Favorito rotado Y perdiendo el set</div><div class="tsub">Alerta cuando rival tiene ≥ juegos en el set actual tras rotura</div></div>
+        <div class="tog on" id="tbrk" onclick="tog(this)"></div>
+      </div>
+      <div class="trow"><div class="tlbl">Incluir ITF</div><div class="tog on" id="titf" onclick="tog(this)"></div></div>
+      <div class="trow"><div class="tlbl">Incluir WTA / WTA 125</div><div class="tog on" id="twta" onclick="tog(this)"></div></div>
+      <div class="trow"><div class="tlbl">Incluir ATP</div><div class="tog on" id="tatp" onclick="tog(this)"></div></div>
+      <div class="trow"><div class="tlbl">Incluir Challenger</div><div class="tog on" id="tch" onclick="tog(this)"></div></div>
+      <div class="cfg2">
+        <div class="cfgbox"><div class="cfglbl">Cuota fav. mínima</div><div class="cfgv"><input type="number" id="cfgTMin" value="1.20" step="0.05" min="1.0">x</div></div>
+        <div class="cfgbox"><div class="cfglbl">Cuota fav. máxima</div><div class="cfgv"><input type="number" id="cfgTMax" value="1.60" step="0.05" min="1.0">x</div></div>
+      </div>
+      <div class="infobox" style="margin-top:10px">
+        <strong>Lógica exacta de alerta:</strong><br>
+        1. Partido monitorizado si algún jugador tiene cuota pre-match entre [1.20, 1.60]<br>
+        2. Se produce rotura si ese jugador pierde su juego de servicio (<span class="cd">serve_lost</span>)<br>
+        3. Alerta solo si tras la rotura: rival tiene MÁS juegos en el set actual<br>
+        → Si va 3-3 y le rompen → 3-4: rival lleva 4 > 3 = <strong>ALERTA ✓</strong><br>
+        → Si va 4-2 y le rompen → 4-3: rival lleva 3 &lt; 4 = <strong>sin alerta</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="sch">⚽ Alertas — Fútbol</div>
+    <div class="scb">
+      <div class="trow"><div class="tlbl">Alerta min.25 — 0-0, primer gol 1ª parte</div><div class="tog on" id="t25" onclick="tog(this)"></div></div>
+      <div class="trow"><div class="tlbl">Alerta min.67 — sin gol en 2ª parte</div><div class="tog on" id="t67" onclick="tog(this)"></div></div>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="sch">⚙ General</div>
+    <div class="scb">
+      <div class="cfg2">
+        <div class="cfgbox"><div class="cfglbl">Stake por defecto</div><div class="cfgv"><input type="number" id="cfgST" value="50" step="10" min="5">€</div></div>
+        <div class="cfgbox"><div class="cfglbl">Intervalo poll (s)</div><div class="cfgv"><input type="number" id="cfgIV" value="30" step="5" min="15" onchange="restartPoll()">s</div></div>
+      </div>
+      <div class="cfgbox" style="margin-top:8px"><div class="cfglbl">Próxima actualización</div><div class="cfgv" id="nextUpd" style="font-size:13px;color:var(--wht2)">—</div></div>
+      <div class="note" style="margin-top:8px">1 unidad = 50€ · AllSportsAPI free: 260 req/hora · con 30s = 2 req/min ✓</div>
+    </div>
+  </div>
+
+  <div class="sc">
+    <div class="sch">🗑 Datos</div>
+    <div class="scb">
+      <button onclick="clearBets()" style="background:rgba(255,85,85,.1);border:1px solid rgba(255,85,85,.25);color:var(--red);padding:9px 16px;font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border-radius:var(--r);text-transform:uppercase;width:100%;letter-spacing:.3px">Borrar todas las apuestas</button>
+    </div>
+  </div>
+
+</div></div>
+</div>
+
+<nav class="bnav">
+  <button class="ni active" id="nav-live" onclick="goPage('live')"><span class="ico">🔴</span>Live<span class="nbadge" id="nbL"></span></button>
+  <button class="ni" id="nav-football" onclick="goPage('football')"><span class="ico">⚽</span>Fútbol<span class="nbadge" id="nbF"></span></button>
+  <button class="ni" id="nav-tennis" onclick="goPage('tennis')"><span class="ico">🎾</span>Tenis<span class="nbadge" id="nbT"></span></button>
+  <button class="ni" id="nav-stats" onclick="goPage('stats');buildStats()"><span class="ico">📊</span>Stats<span class="nbadge" id="nbP"></span></button>
+  <button class="ni" id="nav-config" onclick="goPage('config')"><span class="ico">⚙️</span>Config</button>
+</nav>
+
+<!-- MODAL -->
+<div class="ov" id="ov" onclick="if(event.target===this)closeModal()">
+<div class="modal">
+  <div class="dragh"></div>
+  <div class="mtitle" id="mtitle">Registrar apuesta</div>
+  <div class="msub" id="msub">Rellena los datos de la apuesta</div>
+  <div class="field"><label class="flbl">Partido</label><input type="text" class="finp" id="fMatch" placeholder="Ej: Alcaraz vs Sinner"></div>
+  <div class="f2">
+    <div class="field"><label class="flbl">Cuota</label><input type="number" class="finp" id="fOdds" placeholder="1.35" step="0.01" min="1.01" inputmode="decimal"></div>
+    <div class="field"><label class="flbl">Cantidad (€)</label><input type="number" class="finp" id="fStake" placeholder="50" step="10" min="1" inputmode="numeric"></div>
+  </div>
+  <div class="field"><label class="flbl">Tipo / Competición</label>
+    <select class="finp" id="fType">
+      <option value="goal_ht">⚽ LaLiga — Gol 1ª parte</option>
+      <option value="goal_ht_pl">⚽ Premier — Gol 1ª parte</option>
+      <option value="goal_2h">⚽ LaLiga — Gol 2ª parte</option>
+      <option value="goal_2h_pl">⚽ Premier — Gol 2ª parte</option>
+      <option value="tennis_atp">🎾 ATP — Rotura favorito</option>
+      <option value="tennis_wta">🎾 WTA — Rotura favorito</option>
+      <option value="tennis_wta125">🎾 WTA 125 — Rotura favorito</option>
+      <option value="tennis_itf">🎾 ITF — Rotura favorito</option>
+      <option value="tennis_ch">🎾 Challenger — Rotura favorito</option>
+      <option value="other">— Otro</option>
+    </select>
+  </div>
+  <div class="field"><label class="flbl">Resultado</label>
+    <select class="finp" id="fOut">
+      <option value="pending">⏳ Pendiente</option>
+      <option value="win">✓ Ganada</option>
+      <option value="loss">✗ Perdida</option>
+    </select>
+  </div>
+  <div class="mbtns">
+    <button class="mbtns2" onclick="closeModal()">Cancelar</button>
+    <button class="mbtnp" onclick="saveBet()">Guardar apuesta</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// CONSTANTS & DEFAULTS (pre-configured)
+// ═══════════════════════════════════════
+const DEFAULT_FB  = 'https://roturas25-default-rtdb.europe-west1.firebasedatabase.app';
+const DEFAULT_TGT = '8171273424:AAGMvAxhDnt-HSZSZi8DJeV0j6YEwhfHC5E';
+const DEFAULT_TGC = '6307700447';
+const UNIT        = 50; // 1 unidad = 50€
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let bets    = JSON.parse(ls('r25_bets')    || '[]');
+let alerted = new Set(JSON.parse(ls('r25_alerted') || '[]'));
+let fFilter = 'all', tFilter = 'all';
+let fData   = [], tData    = [];
+let pollT   = null, cdT = null, nextAt = 0;
+let fbOk    = false, fbSyncT = null;
+let statsPeriod = 7, compView = 'all';
+
+// Persisted settings
+let fKey   = ls('r25_fk')  || '';
+let tKey   = ls('r25_tk')  || '';
+let tgT    = ls('r25_tgt') || DEFAULT_TGT;
+let tgC    = ls('r25_tgc') || DEFAULT_TGC;
+let fbUrl  = ls('r25_fb')  || DEFAULT_FB;
+
+function ls(k)      { try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lss(k, v)  { try{ localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); }catch(e){} }
+function $i(id)     { return document.getElementById(id); }
+function ee(s)      { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function badge(id,n){ const b=$i(id); if(b){ b.style.display='flex'; b.textContent=n; } }
+function clrB(id)   { const b=$i(id); if(b) b.style.display='none'; }
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  $i('page-' + id).classList.add('active');
+  $i('nav-'  + id).classList.add('active');
+}
+
+// ═══════════════════════════════════════
+// FIREBASE SYNC (REST API, no SDK)
+// ═══════════════════════════════════════
+async function initFB(url) {
+  url = url.replace(/\/$/, '');
+  try {
+    const r = await fetch(`${url}/ping.json`, { method:'PUT', body: JSON.stringify(Date.now()) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    fbOk = true; fbUrl = url; lss('r25_fb', url);
+    setFBState('ok');
+    $i('fbUrlD').textContent = url;
+    startFBPoll(url);
+  } catch(e) {
+    setFBState('err');
+    $i('fbStatus').textContent = 'Error: ' + e.message;
+    $i('fbStatus').style.color = 'var(--red)';
+  }
+}
+function setFBState(s) {
+  const led = $i('fbLed'), pill = $i('syncPill'), st = $i('fbStatus');
+  led.className = 'led ' + (s === 'ok' ? 'on' : s === 'err' ? 'err' : 'load');
+  pill.className = 'hpill ' + (s === 'ok' ? 'ok' : s === 'err' ? 'err' : '');
+  $i('fbLbl').textContent = s === 'ok' ? 'SYNC ✓' : s === 'err' ? 'SYNC ✗' : 'SYNC...';
+  if (st) { st.textContent = s === 'ok' ? 'Conectado ✓' : s === 'err' ? 'Sin conexión' : 'Conectando...'; st.style.color = s === 'ok' ? 'var(--grn)' : s === 'err' ? 'var(--red)' : 'var(--yel)'; }
+}
+function startFBPoll(url) {
+  clearInterval(fbSyncT);
+  fbSyncT = setInterval(async () => {
+    try {
+      const r = await fetch(`${url}/bets.json`);
+      if (!r.ok) return;
+      const data = await r.json();
+      if (!data) return;
+      const remote = Object.values(data).sort((a,b) => b.id - a.id);
+      if (JSON.stringify(remote) !== JSON.stringify(bets)) {
+        bets = remote; lss('r25_bets', bets);
+        renderLog(); updateStats();
+      }
+    } catch(e) {}
+  }, 5000);
+}
+let fbDebT = null;
+function pushFB() {
+  if (!fbOk) return;
+  clearTimeout(fbDebT);
+  fbDebT = setTimeout(async () => {
+    try {
+      const obj = {}; bets.forEach(b => { obj['b' + b.id] = b; });
+      await fetch(`${fbUrl}/bets.json`, { method:'PUT', body: JSON.stringify(obj) });
+    } catch(e) {}
+  }, 700);
+}
+function changeFB() {
+  const url = ($i('fbIn').value || '').trim();
+  if (!url) { toast('Error','Introduce URL Firebase.','info'); return; }
+  initFB(url);
+}
+
+// ═══════════════════════════════════════
+// TELEGRAM
+// ═══════════════════════════════════════
+async function sendTG(msg) {
+  if (!tgT || !tgC) return;
+  try {
+    await fetch(`https://api.telegram.org/bot${tgT}/sendMessage`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: tgC, text: msg })
+    });
+  } catch(e) {}
+}
+function saveTG() {
+  const t = ($i('tgTok').value||'').trim(), c = ($i('tgCid').value||'').trim();
+  if (!t||!c) { toast('Telegram','Necesitas token y chat ID.','info'); return; }
+  tgT = t; tgC = c; lss('r25_tgt',t); lss('r25_tgc',c);
+  $i('tgPill').classList.add('ok'); $i('tgLbl').textContent = 'TG ✓';
+  toast('Telegram','Guardado correctamente.');
+}
+async function testTG() {
+  await sendTG('✅ Roturas25 activo. Las alertas de rotura y fútbol llegarán aquí.');
+  toast('Telegram','Mensaje de prueba enviado.');
+}
+
+// ═══════════════════════════════════════
+// POLLING
+// ═══════════════════════════════════════
+function startPoll() {
+  clearInterval(pollT); clearInterval(cdT);
+  const iv = parseInt($i('cfgIV').value || '30') * 1000;
+  fetchAll();
+  pollT = setInterval(fetchAll, iv);
+  function tick() {
+    const left = Math.max(0, Math.ceil((nextAt - Date.now()) / 1000));
+    const el = $i('nextUpd'); if (el) el.textContent = left > 0 ? `${left}s` : 'actualizando...';
+  }
+  cdT = setInterval(tick, 1000);
+}
+function restartPoll() { startPoll(); }
+
+async function fetchAll() {
+  nextAt = Date.now() + parseInt($i('cfgIV').value || '30') * 1000;
+  await Promise.allSettled([fetchFootball(), fetchTennis()]);
+  $i('lupd').textContent = 'Última act.: ' + new Date().toLocaleTimeString('es-ES');
+  renderLivePage();
+}
+
+// ═══════════════════════════════════════
+// FOOTBALL API
+// ═══════════════════════════════════════
+const PROXY = 'https://corsproxy.io/?';
+async function pget(url, headers={}) {
+  const r = await fetch(PROXY + encodeURIComponent(url), { headers });
+  if (!r.ok) { let m = 'HTTP ' + r.status; try{ const j=await r.json(); m=j.message||m; }catch(x){} throw new Error(m); }
+  return r.json();
+}
+
+async function fetchFootball() {
+  if (!fKey) return;
+  try {
+    const today    = fmtDate(new Date());
+    const tomorrow = fmtDate(new Date(Date.now() + 86400e3));
+    const [r1, r2] = await Promise.all([
+      pget(`https://api.football-data.org/v4/competitions/PD/matches?dateFrom=${today}&dateTo=${tomorrow}`, {'X-Auth-Token': fKey}),
+      pget(`https://api.football-data.org/v4/competitions/PL/matches?dateFrom=${today}&dateTo=${tomorrow}`, {'X-Auth-Token': fKey}),
+    ]);
+    fData = [
+      ...(r1.matches||[]).map(m => normF(m,'PD')),
+      ...(r2.matches||[]).map(m => normF(m,'PL')),
+    ];
+    checkFAlerts();
+    renderFootball();
+    $i('fBanner').style.display = 'none';
+    const lv = fData.filter(m => m.status==='IN_PLAY'||m.status==='PAUSED').length;
+    $i('ls-fut').textContent = lv;
+  } catch(e) {
+    console.warn('Football error:', e.message);
+    toast('Error fútbol', e.message, 'info');
+  }
+}
+function fmtDate(d) { return d.toISOString().split('T')[0]; }
+function normF(m, code) {
+  const s = m.status;
+  const sh = m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? 0;
+  const sa = m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? 0;
+  const shH = m.score?.halfTime?.home ?? 0, saH = m.score?.halfTime?.away ?? 0;
+  const shF = m.score?.fullTime?.home ?? 0, saF = m.score?.fullTime?.away ?? 0;
+  const g2 = (shF - shH) + (saF - saH);
+  const min = m.minute || (s === 'PAUSED' ? 45 : 0);
+  return {
+    id:`fd_${m.id}`, league: code==='PD' ? 'LaLiga EA Sports' : 'Premier League',
+    k: code==='PD' ? 'laliga' : 'premier',
+    status:s, min, h: m.homeTeam?.shortName||m.homeTeam?.name||'?',
+    a: m.awayTeam?.shortName||m.awayTeam?.name||'?',
+    lh: shF, la: saF, g2, utcDate: m.utcDate,
+    a25: alerted.has(`25_fd_${m.id}`),
+    a67: alerted.has(`67_fd_${m.id}`),
+  };
+}
+
+// ═══════════════════════════════════════
+// TENNIS API — AllSportsAPI
+// ═══════════════════════════════════════
+async function fetchTennis() {
+  if (!tKey) return;
+  try {
+    // Live
+    const live = await pget(`https://apiv2.allsportsapi.com/tennis/?met=Livescore&APIkey=${tKey}`);
+    if (live.success === 0) throw new Error(live.message || 'Error AllSportsAPI');
+    const liveMapped = (live.result || []).map(normT);
+
+    // Upcoming 24h
+    let upcoming = [];
+    try {
+      const today    = fmtDate(new Date());
+      const tomorrow = fmtDate(new Date(Date.now() + 86400e3));
+      const uR = await pget(`https://apiv2.allsportsapi.com/tennis/?met=Fixtures&APIkey=${tKey}&from=${today}&to=${tomorrow}`);
+      upcoming = (uR.result || []).filter(e => e.event_live === '0').map(normTUp);
+    } catch(e) {}
+
+    tData = [...liveMapped, ...upcoming];
+    checkTBreaks(liveMapped);
+    renderTennis();
+    $i('tBanner').style.display = 'none';
+    $i('ls-ten').textContent = liveMapped.length;
+    $i('ls-mon').textContent = liveMapped.filter(m => m.mon).length;
+  } catch(e) {
+    console.warn('Tennis error:', e.message);
+    toast('Error tenis', e.message, 'info');
+  }
+}
+
+function getCat(s) {
+  const l = (s||'').toLowerCase();
+  if (l.includes('itf'))                           return 'itf';
+  if (l.includes('125') || l.includes('w125'))     return 'wta125';
+  if (l.includes('wta'))                           return 'wta';
+  if (l.includes('challenger'))                    return 'challenger';
+  return 'atp';
+}
+
+function normT(e) {
+  const cat = getCat((e.country_name||'') + ' ' + (e.league_name||''));
+
+  // ── ODDS: pre-match winner market ──
+  // AllSportsAPI stores the opening (pre-match) odds in live_odds
+  // even while match is live. We look for "Match Winner" / "Winner" market.
+  const odds = e.live_odds || [];
+  let o1 = null, o2 = null;
+
+  // Strategy 1: find market by name
+  const winMkt = odds.find(o => {
+    const n = (o.odd_name||'').toLowerCase();
+    return n.includes('winner') || n.includes('1x2') || n === 'match result';
+  });
+  if (winMkt) {
+    const v1 = odds.find(o => ['1','1/win','home','1/yes'].includes((o.type||'').toLowerCase()));
+    const v2 = odds.find(o => ['2','2/win','away','2/yes'].includes((o.type||'').toLowerCase()));
+    if (v1) o1 = parseFloat(v1.value) || null;
+    if (v2) o2 = parseFloat(v2.value) || null;
+  }
+  // Strategy 2: scan by type directly
+  if (!o1 && !o2) {
+    odds.forEach(o => {
+      const t = (o.type||'').toLowerCase();
+      const v = parseFloat(o.value);
+      if (!isNaN(v) && v > 1) {
+        if (t === '1' || t === '1/win') o1 = v;
+        if (t === '2' || t === '2/win') o2 = v;
+      }
+    });
+  }
+
+  // ── SCORES ──
+  const scores = e.scores || [];
+  const sets1  = []; const sets2 = [];
+  let sW1 = 0, sW2 = 0;
+  scores.forEach(s => {
+    const v1 = parseInt(s.score_first)||0, v2 = parseInt(s.score_second)||0;
+    sets1.push(v1); sets2.push(v2);
+    if (v1 > v2) sW1++; else if (v2 > v1) sW2++;
+  });
+  const gr  = (e.event_game_result||'0 - 0').split(' - ');
+  const g1  = (gr[0]||'0').trim(), g2 = (gr[1]||'0').trim();
+  const srv = e.event_serve === 'First Player' ? 1 : 2;
+  const curSetNum = scores.length + 1;
+
+  // ── POINT BY POINT — BREAK DETECTION ──
+  // AllSportsAPI returns pointbypoint[] with each completed game.
+  // serve_lost: if not null/empty → the server lost their game = BREAK
+  // player_served: "First Player" or "Second Player"
+  // We look at games in the CURRENT SET only (set_number === `Set ${curSetNum}`)
+  const pbp = e.pointbypoint || [];
+  const curLabel = `Set ${curSetNum}`;
+  const curGames = pbp.filter(g => g.set_number === curLabel);
+
+  let lastBreak = null;
+  if (curGames.length > 0) {
+    const last = curGames[curGames.length - 1];
+    if (last && last.serve_lost != null && last.serve_lost !== '') {
+      // Parse score after this game (e.g. "3 - 4")
+      const sp = (last.score || '').split(' - ');
+      lastBreak = {
+        setLabel:     last.set_number,
+        gameNum:      last.number_game,
+        broken:       last.serve_lost,          // "First Player" or "Second Player"
+        gP1:          parseInt(sp[0]) || 0,     // games P1 in this set after break
+        gP2:          parseInt(sp[1]) || 0,     // games P2 in this set after break
+      };
+    }
+  }
+
+  // ── MONITORING flag ──
+  const oMin = parseFloat($i('cfgTMin')?.value) || 1.20;
+  const oMax = parseFloat($i('cfgTMax')?.value) || 1.60;
+  const mon  = (o1 != null && o1 >= oMin && o1 <= oMax) || (o2 != null && o2 >= oMin && o2 <= oMax);
+
+  return {
+    id:`td_${e.event_key}`, cat,
+    trn: e.league_name || 'Torneo',
+    p1: e.event_first_player||'?', p2: e.event_second_player||'?',
+    o1, o2, sets1, sets2, sW1, sW2, g1, g2, srv,
+    curSetNum, lastBreak, pbpLen: pbp.length, mon,
+    status:'LIVE', isUp: false,
+  };
+}
+
+function normTUp(e) {
+  const cat = getCat((e.country_name||'') + ' ' + (e.league_name||''));
+  const dt  = new Date(`${e.event_date}T${e.event_time||'00:00'}:00`);
+  const localT = dt.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Madrid'});
+  const localD = dt.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'2-digit'});
+  return {
+    id:`tdu_${e.event_key}`, cat, trn: e.league_name||'Torneo',
+    p1: e.event_first_player||'?', p2: e.event_second_player||'?',
+    o1:null, o2:null, mon:false, localT, localD,
+    status:'UPCOMING', isUp:true,
+  };
+}
+
+// ═══════════════════════════════════════
+// BREAK DETECTION
+// ═══════════════════════════════════════
+function isAlert(m, oMin, oMax) {
+  if (!m.lastBreak || m.isUp) return false;
+  // Who is the favorite (in odds range)?
+  let favIs = null;
+  if (m.o1 != null && m.o1 >= oMin && m.o1 <= oMax) favIs = 'First Player';
+  else if (m.o2 != null && m.o2 >= oMin && m.o2 <= oMax) favIs = 'Second Player';
+  else return false;
+  // Was the FAVORITE broken?
+  if (m.lastBreak.broken !== favIs) return false;
+  // Is the favorite LOSING (rival has MORE games) after the break?
+  const favG = favIs === 'First Player' ? m.lastBreak.gP1 : m.lastBreak.gP2;
+  const rivG = favIs === 'First Player' ? m.lastBreak.gP2 : m.lastBreak.gP1;
+  // Alert if rival has ≥ games (covers tied→break scenario: 3-3 → 3-4, rivG=4 > favG=3)
+  return rivG > favG;
+}
+
+function checkTBreaks(liveMsm) {
+  const onBrk = $i('tbrk').classList.contains('on');
+  const itfOn = $i('titf').classList.contains('on');
+  const wtaOn = $i('twta').classList.contains('on');
+  const atpOn = $i('tatp').classList.contains('on');
+  const chOn  = $i('tch').classList.contains('on');
+  const oMin  = parseFloat($i('cfgTMin').value) || 1.20;
+  const oMax  = parseFloat($i('cfgTMax').value) || 1.60;
+  let cnt = 0;
+
+  liveMsm.forEach(m => {
+    if (!onBrk) return;
+    if (m.cat==='itf'                          && !itfOn) return;
+    if ((m.cat==='wta'||m.cat==='wta125')      && !wtaOn) return;
+    if (m.cat==='atp'                          && !atpOn) return;
+    if (m.cat==='challenger'                   && !chOn)  return;
+    if (!isAlert(m, oMin, oMax)) return;
+
+    const kb = `brk_${m.id}_${m.lastBreak.setLabel}_${m.lastBreak.gameNum}`;
+    if (alerted.has(kb)) return;
+    alerted.add(kb); lss('r25_alerted', [...alerted]);
+    cnt++;
+
+    const favIs   = (m.o1!=null && m.o1>=oMin && m.o1<=oMax) ? 'First Player' : 'Second Player';
+    const favName = favIs === 'First Player' ? m.p1 : m.p2;
+    const favO    = favIs === 'First Player' ? m.o1 : m.o2;
+    const tk = m.cat==='itf'?'tennis_itf':m.cat==='wta125'?'tennis_wta125':m.cat==='wta'?'tennis_wta':m.cat==='challenger'?'tennis_ch':'tennis_atp';
+    const stk = $i('cfgST').value || '50';
+
+    const msg = `🎾 ROTURAS25 — ROTURA\n${m.p1} vs ${m.p2}\n${m.trn} [${m.cat.toUpperCase()}]\n⚠ ${favName} ROTADO (cuota pre-match: ${favO}x)\nSet ${m.curSetNum}: ${m.p1} ${m.lastBreak.gP1}–${m.lastBreak.gP2} ${m.p2}\n${favName} va PERDIENDO → apostar: gana el set\nCuota: P1=${m.o1??'n/d'} P2=${m.o2??'n/d'}`;
+
+    toast(`🎾 ROTURA — ${favName}`,
+      `${m.p1} vs ${m.p2} · Set ${m.curSetNum}: ${m.lastBreak.gP1}–${m.lastBreak.gP2}\nCuota pre-match fav.: ${favO}x`,
+      'alert',
+      { match:`${m.p1} vs ${m.p2}`, type:tk, odds:String(favO), stake:stk }
+    );
+    sendTG(msg);
+    vib();
+  });
+
+  if (cnt > 0) badge('nbL', cnt);
+  const alertEl = document.querySelector('.ni#nav-live .nbadge');
+}
+
+// ═══════════════════════════════════════
+// FOOTBALL ALERTS
+// ═══════════════════════════════════════
+function checkFAlerts() {
+  const on25 = $i('t25').classList.contains('on');
+  const on67 = $i('t67').classList.contains('on');
+  const stk  = $i('cfgST').value || '50';
+
+  fData.forEach(m => {
+    if (m.status !== 'IN_PLAY' || !m.min) return;
+
+    const k25 = `25_${m.id}`;
+    if (on25 && m.min >= 24 && m.min <= 31 && m.lh === 0 && m.la === 0 && !alerted.has(k25)) {
+      alerted.add(k25); m.a25 = true;
+      lss('r25_alerted', [...alerted]);
+      const msg = `⚽ ${m.h} vs ${m.a} · 0-0 al min.${m.min} → Gol 1ª parte`;
+      toast('⚽ GOL 1ª PARTE', `${m.h} vs ${m.a} · min.${m.min} · 0-0`, 'warn', { match:`${m.h} vs ${m.a}`, type:'goal_ht', stake:stk });
+      sendTG('⚽ ROTURAS25 — FÚTBOL\n' + msg); vib();
+    }
+
+    const k67 = `67_${m.id}`;
+    if (on67 && m.min >= 66 && m.min <= 73 && m.g2 === 0 && !alerted.has(k67)) {
+      alerted.add(k67); m.a67 = true;
+      lss('r25_alerted', [...alerted]);
+      const msg = `⚽ ${m.h} vs ${m.a} · Sin gol 2ª parte al min.${m.min} → Apostar gol`;
+      toast('⚽ GOL 2ª PARTE', `${m.h} vs ${m.a} · min.${m.min} · sin gol 2ª`, 'warn', { match:`${m.h} vs ${m.a}`, type:'goal_2h', stake:stk });
+      sendTG('⚽ ROTURAS25 — FÚTBOL\n' + msg); vib();
+    }
+  });
+}
+
+// ═══════════════════════════════════════
+// RENDER LIVE PAGE
+// ═══════════════════════════════════════
+function renderLivePage() {
+  const oMin = parseFloat($i('cfgTMin')?.value) || 1.20;
+  const oMax = parseFloat($i('cfgTMax')?.value) || 1.60;
+
+  const liveTen   = tData.filter(m => !m.isUp);
+  const monitored = liveTen.filter(m => m.mon);
+  const alerts    = liveTen.filter(m => isAlert(m, oMin, oMax));
+  const fAlerts   = fData.filter(m => m.a25 || m.a67);
+
+  $i('ls-rot').textContent = alerts.length;
+  $i('ls-mon').textContent = monitored.length;
+  $i('ls-fut').textContent = fData.filter(m=>m.status==='IN_PLAY'||m.status==='PAUSED').length;
+  $i('ls-ten').textContent = liveTen.length;
+
+  // Alert tennis
+  const ae = $i('live-alerts');
+  if (!alerts.length) ae.innerHTML = '<div class="empty"><div class="ei">🟢</div>Sin roturas activas ahora mismo</div>';
+  else ae.innerHTML = alerts.map(m => tCardHtml(m, oMin, oMax)).join('');
+
+  // Football alerts
+  const fe = $i('live-football');
+  if (!fAlerts.length) fe.innerHTML = '<div class="empty"><div class="ei">⚽</div>Sin alertas de fútbol ahora</div>';
+  else fe.innerHTML = fAlerts.map(m => fCardHtml(m)).join('');
+
+  // Monitored tennis
+  const te = $i('live-tennis');
+  if (!monitored.length) te.innerHTML = '<div class="empty"><div class="ei">🎾</div>Sin partidos monitorizados (ninguno con cuota favorita 1.20–1.60)</div>';
+  else te.innerHTML = monitored.map(m => tCardHtml(m, oMin, oMax)).join('');
+
+  if (alerts.length) badge('nbL', alerts.length); else clrB('nbL');
+}
+
+// ═══════════════════════════════════════
+// RENDER FOOTBALL
+// ═══════════════════════════════════════
+function renderFootball() {
+  const now = Date.now(), end24 = now + 86400e3;
+  let d = fData.filter(m => {
+    if (fFilter === 'laliga')  return m.k === 'laliga';
+    if (fFilter === 'premier') return m.k === 'premier';
+    if (fFilter === 'live')    return m.status==='IN_PLAY'||m.status==='PAUSED';
+    if (fFilter === 'up24')    return m.status==='SCHEDULED' && new Date(m.utcDate).getTime()>=now && new Date(m.utcDate).getTime()<=end24;
+    return true;
+  });
+  d.sort((a,b) => {
+    const o = s => s==='IN_PLAY'?0:s==='PAUSED'?1:s==='SCHEDULED'?2:3;
+    return o(a.status) - o(b.status);
+  });
+  const el = $i('fcards');
+  if (!d.length) { el.innerHTML = '<div class="empty"><div class="ei">⚽</div>Sin partidos para este filtro</div>'; return; }
+  el.innerHTML = d.map(fCardHtml).join('');
+}
+
+function fCardHtml(m) {
+  const stk  = $i('cfgST').value || '50';
+  const iL   = m.status === 'IN_PLAY', iP = m.status === 'PAUSED', iF = m.status === 'FINISHED';
+  const isUp = m.status === 'SCHEDULED';
+  const cls  = m.a25 ? 'a25' : m.a67 ? 'a67' : iL ? 'live' : iP ? 'live' : iF ? 'fin' : 'upcoming';
+
+  let timeHtml, badgeHtml;
+  if (iL)  { timeHtml = `<div class="fcmin lv">${m.min}'</div>`; badgeHtml = `<div class="fcbadge lv">LIVE</div>`; }
+  else if (iP) { timeHtml = `<div class="fcmin ht" style="font-size:14px">D.M.</div>`; badgeHtml = `<div class="fcbadge ht">DESC.</div>`; }
+  else if (iF) { timeHtml = `<div class="fcmin fin">FIN</div>`; badgeHtml = `<div class="fcbadge fin">FIN</div>`; }
+  else {
+    const t = new Date(m.utcDate).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Madrid'});
+    timeHtml = `<div class="upt">${t}</div><div class="ups">${new Date(m.utcDate).toLocaleDateString('es-ES',{weekday:'short'})}</div>`;
+    badgeHtml = `<div class="fcbadge ns">HOY</div>`;
+  }
+
+  const sc   = iL||iP||iF ? `<div class="fc-sc${m.lh===0&&m.la===0?' z':''}">${m.lh}–${m.la}</div>` : '';
+  const g2i  = (iL && m.min > 45) ? `<div class="fc-g2">Goles 2ªP: ${m.g2}</div>` : '';
+  const a25  = m.a25 ? `<div class="alert-bar g"><div class="alert-txt">⚡ MIN.${m.min} · 0-0 → GOL 1ª PARTE</div><button class="logbtn g" onclick="openFA('${ee(m.h+' vs '+m.a)}','goal_ht','${stk}')">📝 Registrar</button></div>` : '';
+  const a67  = m.a67 ? `<div class="alert-bar y"><div class="alert-txt">⚡ MIN.${m.min} · SIN GOL 2ª PARTE</div><button class="logbtn y" onclick="openFA('${ee(m.h+' vs '+m.a)}','goal_2h','${stk}')">📝 Registrar</button></div>` : '';
+
+  return `<div class="card ${cls}">
+    <div class="fc-in">
+      <div class="fc-time">${timeHtml}${badgeHtml}</div>
+      <div>
+        <div class="fc-lg">${m.league}</div>
+        <div class="fc-teams">
+          <span class="fc-t">${m.h}</span>
+          ${sc}
+          <span class="fc-t">${m.a}</span>
+        </div>
+        ${g2i}
+      </div>
+    </div>
+    ${a25}${a67}
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+// RENDER TENNIS
+// ═══════════════════════════════════════
+function renderTennis() {
+  const oMin = parseFloat($i('cfgTMin').value) || 1.20;
+  const oMax = parseFloat($i('cfgTMax').value) || 1.60;
+  const flt  = tData.filter(m => {
+    if (tFilter === 'up24')      return m.isUp;
+    if (m.isUp)                  return false;
+    if (tFilter === 'mon')       return m.mon;
+    if (tFilter === 'alert')     return isAlert(m, oMin, oMax);
+    if (tFilter === 'all')       return true;
+    return m.cat === tFilter;
+  });
+  const el = $i('tcards');
+  if (!flt.length) { el.innerHTML = `<div class="empty"><div class="ei">🎾</div>${tKey?'Sin partidos para este filtro':'Configura tu API Key para ver partidos'}</div>`; return; }
+  el.innerHTML = flt.map(m => m.isUp ? tUpHtml(m) : tCardHtml(m, oMin, oMax)).join('');
+}
+
+function tCardHtml(m, oMin, oMax) {
+  const stk   = $i('cfgST').value || '50';
+  const iAlt  = isAlert(m, oMin, oMax);
+
+  // Determine fav
+  let favIs = null, favName = null, favO = null;
+  if (m.o1!=null && m.o1>=oMin && m.o1<=oMax) { favIs='First Player'; favName=m.p1; favO=m.o1; }
+  else if (m.o2!=null && m.o2>=oMin && m.o2<=oMax) { favIs='Second Player'; favName=m.p2; favO=m.o2; }
+
+  // Build set columns
+  const maxS = Math.max(3, m.sets1.length + 1);
+  const cols = Array.from({length:maxS}, (_,si) => {
+    const isCur = si === m.sets1.length;
+    const v1 = isCur ? m.g1 : (m.sets1[si]??'');
+    const v2 = isCur ? m.g2 : (m.sets2[si]??'');
+    const c1 = isCur ? 'cur' : (v1!==''&&v1>v2?'won':'');
+    const c2 = isCur ? 'cur' : (v2!==''&&v2>v1?'won':'');
+    return {v1,v2,c1,c2};
+  });
+  const r1 = cols.map(c=>`<div class="tset ${c.c1}">${c.v1}</div>`).join('');
+  const r2 = cols.map(c=>`<div class="tset ${c.c2}">${c.v2}</div>`).join('');
+
+  const o1cls = (m.o1!=null && m.o1>=oMin && m.o1<=oMax) ? 'fav' : '';
+  const o2cls = (m.o2!=null && m.o2>=oMin && m.o2<=oMax) ? 'fav' : '';
+  const o1d   = m.o1!=null ? `<div class="todds ${o1cls}">${m.o1}x</div>` : '';
+  const o2d   = m.o2!=null ? `<div class="todds ${o2cls}">${m.o2}x</div>` : '';
+
+  const monB  = m.mon ? `<span class="tc-mon yes">🟡 MONIT.</span>` : `<span class="tc-mon no">—</span>`;
+  const tk    = m.cat==='itf'?'tennis_itf':m.cat==='wta125'?'tennis_wta125':m.cat==='wta'?'tennis_wta':m.cat==='challenger'?'tennis_ch':'tennis_atp';
+
+  let alertHtml = '';
+  if (iAlt && m.lastBreak && favName) {
+    alertHtml = `<div class="tc-alert">
+      <div class="tc-alert-title">🟢 ROTURA — ${favName.toUpperCase()} VA PERDIENDO</div>
+      <div class="tc-alert-sc">${m.p1} <strong>${m.lastBreak.gP1}–${m.lastBreak.gP2}</strong> ${m.p2} (Set ${m.curSetNum})</div>
+      <div class="tc-alert-odds">Cuota pre-match: P1 = <strong>${m.o1??'n/d'}x</strong>  /  P2 = <strong>${m.o2??'n/d'}x</strong><br>Favorito: <strong>${favName}</strong> a <strong>${favO}x</strong> → apostar que gana el set</div>
+      <button class="logbtn g" onclick="openFA('${ee(m.p1+' vs '+m.p2)}','${tk}','${stk}','${favO||''}')">📝 Registrar apuesta</button>
+    </div>`;
+  }
+
+  const oddsInfo = (m.o1==null&&m.o2==null)
+    ? `<div class="tc-badge">Cuotas: pendientes</div>`
+    : `<div class="tc-badge src">Cuotas pre-match: ${m.o1??'n/d'}x / ${m.o2??'n/d'}x · Fuente: AllSportsAPI</div>`;
+  const pbpBadge = `<div class="tc-badge">P2P: ${m.pbpLen} juegos</div>`;
+
+  return `<div class="card ${iAlt?'alert':m.mon?'mon':'live'}">
+    <div class="tc-in">
+      <div class="tc-top">
+        <div>
+          <div class="tc-trn">${m.trn}</div>
+          <div class="tc-cat ${m.cat}">${m.cat==='wta125'?'WTA 125':m.cat.toUpperCase()}</div>
+        </div>
+        <div style="text-align:right">
+          ${monB}
+          <div style="margin-top:3px"><span class="fcbadge lv">LIVE</span></div>
+        </div>
+      </div>
+      <div class="tc-rows">
+        <div class="tc-row">
+          <div class="tc-name ${m.srv===1?'srv':''}">${m.p1}</div>
+          ${r1}
+          ${o1d}
+        </div>
+        <div class="tc-row">
+          <div class="tc-name ${m.srv===2?'srv':''}">${m.p2}</div>
+          ${r2}
+          ${o2d}
+        </div>
+      </div>
+      <div class="tc-info">${oddsInfo}${pbpBadge}</div>
+      ${alertHtml}
+    </div>
+  </div>`;
+}
+
+function tUpHtml(m) {
+  return `<div class="card upcoming">
+    <div class="tc-in">
+      <div class="tc-top">
+        <div><div class="tc-trn">${m.trn}</div><div class="tc-cat ${m.cat}">${m.cat==='wta125'?'WTA 125':m.cat.toUpperCase()}</div></div>
+        <div style="text-align:right"><div class="upt">${m.localT}</div><div class="ups">${m.localD}</div></div>
+      </div>
+      <div class="tc-rows">
+        <div class="tc-row"><div class="tc-name">${m.p1}</div></div>
+        <div class="tc-row"><div class="tc-name">${m.p2}</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+// MODAL & BET SAVING
+// ═══════════════════════════════════════
+function openModal() {
+  $i('mtitle').textContent = 'Registrar apuesta';
+  $i('msub').textContent   = 'Rellena los datos de la apuesta';
+  $i('fMatch').value = ''; $i('fOdds').value = '';
+  $i('fStake').value = $i('cfgST').value || '50';
+  $i('fType').value  = 'goal_ht'; $i('fOut').value = 'pending';
+  $i('ov').classList.add('open');
+}
+function openFA(match, type, stake, odds) {
+  $i('fMatch').value = match; $i('fType').value = type;
+  $i('fStake').value = stake; $i('fOdds').value = odds || '';
+  $i('mtitle').textContent = '📝 Apuesta detectada';
+  $i('msub').textContent   = 'Confirma y guarda';
+  $i('ov').classList.add('open');
+}
+function closeModal() { $i('ov').classList.remove('open'); }
+
+function saveBet() {
+  const match = $i('fMatch').value.trim();
+  const odds  = parseFloat($i('fOdds').value);
+  const stake = parseFloat($i('fStake').value);
+  const type  = $i('fType').value;
+  const out   = $i('fOut').value;
+  if (!match || !odds || !stake) { toast('Error','Partido, cuota y cantidad son obligatorios.','info'); return; }
+  const profit = out==='win' ? parseFloat(((odds-1)*stake).toFixed(2)) : out==='loss' ? -stake : 0;
+  const now    = new Date();
+  const bet    = {
+    id: Date.now(), match, odds, stake, type, outcome: out, profit,
+    date: now.toLocaleDateString('es-ES') + ' ' + now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})
+  };
+  bets.unshift(bet); lss('r25_bets', bets);
+  pushFB(); renderLog(); updateStats(); closeModal();
+  toast('Apuesta guardada', match + ' · @' + odds + 'x · ' + stake + '€');
+}
+
+function res(id, out) {
+  const b = bets.find(x => x.id === id); if (!b) return;
+  b.outcome = out;
+  b.profit  = out==='win' ? parseFloat(((b.odds-1)*b.stake).toFixed(2)) : -b.stake;
+  lss('r25_bets', bets); pushFB(); renderLog(); updateStats();
+  toast(out==='win'?'✓ Ganada':'✗ Perdida', `${b.match} · ${out==='win'?'+'+b.profit.toFixed(2):b.profit.toFixed(2)}€`);
+}
+
+function delBet(id) {
+  bets = bets.filter(b => b.id !== id);
+  lss('r25_bets', bets); pushFB(); renderLog(); updateStats();
+}
+
+function clearBets() {
+  if (!confirm('¿Borrar todas las apuestas? Esta acción no se puede deshacer.')) return;
+  bets = []; lss('r25_bets', bets); pushFB(); renderLog(); updateStats();
+  toast('Datos borrados','Se eliminaron todas las apuestas.','info');
+}
+
+// ═══════════════════════════════════════
+// BET LOG
+// ═══════════════════════════════════════
+const TL = {
+  goal_ht:'⚽ LaLiga Gol 1ªP', goal_ht_pl:'⚽ Premier Gol 1ªP',
+  goal_2h:'⚽ LaLiga Gol 2ªP', goal_2h_pl:'⚽ Premier Gol 2ªP',
+  tennis_atp:'🎾 ATP Rotura', tennis_wta:'🎾 WTA Rotura',
+  tennis_wta125:'🎾 WTA 125 Rotura', tennis_itf:'🎾 ITF Rotura',
+  tennis_ch:'🎾 Challenger Rotura', other:'—'
+};
+const COMP_MAP = {
+  '⚽ LaLiga':     ['goal_ht','goal_2h'],
+  '⚽ Premier':    ['goal_ht_pl','goal_2h_pl'],
+  '🎾 ATP':        ['tennis_atp'],
+  '🎾 WTA/W125':   ['tennis_wta','tennis_wta125'],
+  '🎾 ITF':        ['tennis_itf'],
+  '🎾 Challenger': ['tennis_ch'],
+};
+
+function betRowHtml(b) {
+  const units = (b.profit||0) / UNIT;
+  const pt = b.outcome==='pending' ? '⏳' : b.outcome==='win' ? `+${b.profit.toFixed(2)}€` : `${b.profit.toFixed(2)}€`;
+  const us = b.outcome!=='pending' ? ` (${units>=0?'+':''}${units.toFixed(2)}u)` : '';
+  const acts = b.outcome==='pending'
+    ? `<div class="bacts">
+        <button class="bmi g" onclick="res(${b.id},'win')">✓ Ganada</button>
+        <button class="bmi r" onclick="res(${b.id},'loss')">✗ Perdida</button>
+        <button class="bmi del" onclick="delBet(${b.id})">🗑</button>
+       </div>` : `<div class="bacts"><button class="bmi del" onclick="delBet(${b.id})">🗑</button></div>`;
+  return `<div class="betrow ${b.outcome}">
+    <div>
+      <div class="bname">${b.match}</div>
+      <div class="bmeta">${TL[b.type]||'—'} · @${b.odds}x · ${b.stake}€ · ${b.date}</div>
+      ${acts}
+    </div>
+    <div style="text-align:right">
+      <div class="bprofit ${b.outcome}">${pt}</div>
+      <div class="bunits">${us}</div>
+    </div>
+  </div>`;
+}
+
+function renderLog() {
+  const el = $i('blog');
+  el.innerHTML = bets.length === 0
+    ? '<div class="empty"><div class="ei">📋</div>Sin apuestas registradas</div>'
+    : bets.slice(0,60).map(betRowHtml).join('');
+  const p = bets.filter(b=>b.outcome==='pending').length;
+  if (p) badge('nbP', p); else clrB('nbP');
+}
+
+// ═══════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════
+function updateStats() {
+  const tot = bets.length;
+  const w   = bets.filter(b=>b.outcome==='win').length;
+  const l   = bets.filter(b=>b.outcome==='loss').length;
+  const p   = bets.filter(b=>b.outcome==='pending').length;
+  const prf = bets.reduce((s,b)=>s+(b.profit||0),0);
+  const totS= bets.filter(b=>b.outcome!=='pending').reduce((s,b)=>s+(b.stake||0),0);
+  const wr  = (w+l)>0 ? Math.round(w/(w+l)*100) : 0;
+  const yld = totS>0 ? (prf/totS*100).toFixed(1) : '0.0';
+  const units = (prf/UNIT).toFixed(2);
+
+  $i('st').textContent = tot; $i('sw').textContent = w;
+  $i('sl').textContent = l;  $i('sp').textContent = p;
+  $i('wrt').textContent = wr+'%'; $i('wrf').style.width = wr+'%';
+
+  const uel = $i('su'); uel.textContent = (parseFloat(units)>=0?'+':'')+units+'u';
+  uel.style.color = parseFloat(units)>=0 ? 'var(--grn)' : '#ff8888';
+  const yel = $i('sy'); yel.textContent = (parseFloat(yld)>=0?'+':'')+yld+'%';
+  yel.style.color = parseFloat(yld)>=0 ? 'var(--grn)' : '#ff8888';
+  const bel = $i('sbp'); bel.textContent = (prf>=0?'+':'')+prf.toFixed(2)+'€';
+  bel.style.color = prf>=0 ? 'var(--grn)' : '#ff8888';
+
+  drawChart($i('minichart'), bets, 300, 80);
+}
+
+function setPeriod(d, btn) {
+  statsPeriod = d;
+  document.querySelectorAll('.psel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active'); buildStats();
+}
+function setComp(v, btn) {
+  compView = v;
+  document.querySelectorAll('.ctab').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active'); renderCompBets();
+}
+function buildStats() {
+  const now  = Date.now();
+  const flt  = statsPeriod===0 ? bets : bets.filter(b=>{ const d=parseD(b.date); return d&&(now-d)<statsPeriod*86400e3; });
+  drawChart($i('bigchart'), flt, 400, 110);
+  buildCompStats(flt);
+}
+function buildCompStats(fb) {
+  const tabs = $i('ctabs'), grid = $i('cgrid');
+  const comps = {};
+  fb.forEach(b => {
+    const g = getGroup(b.type);
+    if (!comps[g]) comps[g] = {name:g, profit:0, wins:0, losses:0, stake:0};
+    comps[g].profit += (b.profit||0); comps[g].stake += (b.stake||0);
+    if (b.outcome==='win')  comps[g].wins++;
+    if (b.outcome==='loss') comps[g].losses++;
+  });
+  // Add tabs
+  Object.keys(comps).forEach(k => {
+    if (!tabs.querySelector(`[data-comp="${k}"]`)) {
+      const btn = document.createElement('button');
+      btn.className='ctab'; btn.dataset.comp=k; btn.textContent=k;
+      btn.onclick = () => setComp(k,btn); tabs.appendChild(btn);
+    }
+  });
+  if (!Object.keys(comps).length) { grid.innerHTML='<div style="font-family:IBM Plex Mono;font-size:9px;color:var(--wht4);grid-column:1/-1">Sin apuestas en este período</div>'; return; }
+  grid.innerHTML = Object.values(comps).map(c => {
+    const wr  = (c.wins+c.losses)>0 ? Math.round(c.wins/(c.wins+c.losses)*100) : 0;
+    const yld = c.stake>0 ? (c.profit/c.stake*100).toFixed(1) : '0.0';
+    const u   = (c.profit/UNIT).toFixed(1);
+    const cls = c.profit>0?'g':c.profit<0?'r':'z';
+    const col = c.profit>=0 ? 'var(--grn)' : '#ff8888';
+    return `<div class="cbox">
+      <div class="cname">${c.name}</div>
+      <div class="cprof ${cls}">${c.profit>=0?'+':''}${c.profit.toFixed(0)}€</div>
+      <div class="csub">${c.wins}G / ${c.losses}P · ${wr}% WR<br>${parseFloat(yld)>=0?'+':''}${yld}% yield · ${parseFloat(u)>=0?'+':''}${u}u</div>
+      <div class="cbar"><div class="cfill" style="width:${wr}%;background:${col}"></div></div>
+    </div>`;
+  }).join('');
+}
+function renderCompBets() {
+  const el = $i('cbets');
+  if (compView==='all') { el.style.display='none'; return; }
+  el.style.display='flex';
+  const types = COMP_MAP[compView]||[];
+  const flt   = bets.filter(b=>types.includes(b.type));
+  el.innerHTML = flt.length===0 ? `<div class="empty"><div class="ei">📭</div>Sin apuestas en ${compView}</div>` : flt.map(betRowHtml).join('');
+}
+function getGroup(t) {
+  for (const [n,ts] of Object.entries(COMP_MAP)) { if (ts.includes(t)) return n; }
+  return '— Otro';
+}
+function parseD(s) {
+  try {
+    const [d,t] = s.split(' ');
+    const [dy,mo,yr] = d.split('/');
+    return new Date(`${yr}-${mo}-${dy}T${t}`).getTime();
+  } catch(e) { return null; }
+}
+
+// ═══════════════════════════════════════
+// CHART
+// ═══════════════════════════════════════
+function drawChart(svg, data, W, H) {
+  if (!svg) return;
+  const res = [...data].filter(b=>b.outcome!=='pending').reverse();
+  if (res.length < 2) {
+    svg.innerHTML = `<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#2c4560" font-size="9" font-family="IBM Plex Mono">Sin datos suficientes</text>`;
+    return;
+  }
+  let run = 0;
+  const pts = res.map((b,i) => { run += b.profit||0; return {x:i,y:run}; });
+  const mn = Math.min(...pts.map(p=>p.y)), mx = Math.max(...pts.map(p=>p.y)), rY = mx-mn||1;
+  const P = 10;
+  const tx = i => P + (i/(pts.length-1))*(W-2*P);
+  const ty = y => P + (1-(y-mn)/rY)*(H-2*P);
+  const path = pts.map((p,i) => `${i===0?'M':'L'}${tx(i).toFixed(1)} ${ty(p.y).toFixed(1)}`).join(' ');
+  const area = path + ` L${tx(pts.length-1).toFixed(1)} ${H} L${tx(0).toFixed(1)} ${H}Z`;
+  const last = pts[pts.length-1].y;
+  const col  = last >= 0 ? '#00ff88' : '#ff8888';
+  const uid  = W + '_' + H;
+  svg.innerHTML = `<defs><linearGradient id="g${uid}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${col}" stop-opacity=".18"/>
+    <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
+  </linearGradient></defs>
+  <path d="${area}" fill="url(#g${uid})"/>
+  <path d="${path}" fill="none" stroke="${col}" stroke-width="1.5"/>
+  <circle cx="${tx(pts.length-1).toFixed(1)}" cy="${ty(last).toFixed(1)}" r="3" fill="${col}"/>
+  <text x="${Math.min(tx(pts.length-1)-4, W-30).toFixed(1)}" y="${Math.max(ty(last)-6, 12).toFixed(1)}" fill="${col}" font-size="8" font-family="IBM Plex Mono" text-anchor="end">${last>=0?'+':''}${last.toFixed(0)}€</text>`;
+}
+
+// ═══════════════════════════════════════
+// TOASTS
+// ═══════════════════════════════════════
+function toast(title, body, type='alert', betData=null) {
+  const wrap = $i('toasts');
+  const d = document.createElement('div');
+  d.className = 'toast' + (type==='warn'?' warn':type==='info'?' info':'');
+  const ico = type==='warn'?'⚽':type==='info'?'ℹ️':'🎾';
+  const btnHtml = betData
+    ? `<button class="tbtn" onclick="openFA('${ee(betData.match)}','${betData.type}','${betData.stake||50}','${betData.odds||''}');this.closest('.toast').remove()">📝 Registrar</button>`
+    : '';
+  d.innerHTML = `<div class="tist">${ico}</div><div><div class="ttitle">${title}</div><div class="tbody">${body.replace(/\n/g,'<br>')}</div>${btnHtml}</div>`;
+  wrap.appendChild(d);
+  setTimeout(() => d.remove(), betData ? 20000 : 7000);
+}
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+function tog(el) { el.classList.toggle('on'); }
+function vib()   { try{ navigator.vibrate && navigator.vibrate(120); }catch(e){} }
+function setFF(v,btn) { fFilter=v; document.querySelectorAll('#pf .pill').forEach(p=>p.classList.remove('active')); btn.classList.add('active'); renderFootball(); }
+function setTF(v,btn) { tFilter=v; document.querySelectorAll('#pt .pill').forEach(p=>p.classList.remove('active')); btn.classList.add('active'); renderTennis(); }
+
+function saveKey(t, src) {
+  const isConf = src === 's';
+  const val = ($i(t==='f' ? (isConf?'fks':'fkb') : (isConf?'tks':'tkb'))?.value||'').trim();
+  if (!val) { toast('Error','Introduce la API Key.','info'); return; }
+  if (t==='f') { fKey=val; lss('r25_fk',val); $i('fKD').textContent=val.slice(0,8)+'...'; $i('fKD').className='kd set'; $i('fBanner').style.display='none'; fetchFootball(); }
+  else         { tKey=val; lss('r25_tk',val); $i('tKD').textContent=val.slice(0,8)+'...'; $i('tKD').className='kd set'; $i('tBanner').style.display='none'; fetchTennis(); }
+  toast('API Key guardada','Conectando...');
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Restore API keys display
+  if (fKey) { $i('fKD').textContent=fKey.slice(0,8)+'...'; $i('fKD').className='kd set'; $i('fBanner').style.display='none'; }
+  if (tKey) { $i('tKD').textContent=tKey.slice(0,8)+'...'; $i('tKD').className='kd set'; $i('tBanner').style.display='none'; }
+  if (tgT !== DEFAULT_TGT) { $i('tgPill').classList.add('ok'); $i('tgLbl').textContent='TG ✓'; }
+  else { $i('tgPill').classList.add('ok'); $i('tgLbl').textContent='TG ✓'; } // default is pre-configured
+
+  // Firebase init (pre-configured)
+  setFBState('load');
+  initFB(fbUrl);
+
+  // TG state
+  $i('tgPill').classList.add('ok'); $i('tgLbl').textContent='TG ✓';
+
+  // Render existing data
+  renderLog(); updateStats();
+
+  // Start polling
+  startPoll();
+});
+</script>
+</body>
+</html>
